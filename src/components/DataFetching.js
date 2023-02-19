@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 function DataFetching() {
-    const [dataItems, setUsers] = useState([]);
+    const [dataItems, setDataItems] = useState([]);
     const [url, setUrl] = useState("https://jsonplaceholder.typicode.com/posts/1/users");
     const [column, setColumn] = useState([]);
     const [error, setError] = useState('');
@@ -11,15 +11,20 @@ function DataFetching() {
             .get(url)
             .then((res) => {
                 console.log(res);
-                isJsonObject(res.data);
-                setUsers(res.data);
-                setColumn(Object.keys(res.data[0]));
+                if (Array.isArray(res.data)){   //if the response is a array of json objects.
+                    isJsonObject(res.data[0]);
+                    setDataItems(res.data);
+                    setColumn(Object.keys(res.data[0]));
+                }else{  //if the response is only a json object
+                    setDataItems(new Array(res.data));
+                    setColumn(Object.keys(res.data));
+                }
                 setError('');
             })
             .catch((err) => {
                 console.log(err);
                 setError(err);
-                setUsers([]);
+                setDataItems([]);
                 setColumn([]);
             });
     };
@@ -34,7 +39,7 @@ function DataFetching() {
     const tdData = () => {
         return dataItems.map((data) => {
             return (
-                <tr key = {data.id} >
+                <tr key = {data.id+1000} >
                     {column.map((v) => {
                         return <td key = {data.id + v}>{JSON.stringify(data[v]).replace(/"/g, " ")}</td>;
                     })}
@@ -71,9 +76,9 @@ function DataFetching() {
                 </form>
             </div>
             <div>
-                <table className="table">
+                <table className="table table-bordered table-striped table-dark" variant="dark" size="sm">
                     <thead>
-                        <tr>{ThData()}</tr>
+                        <tr >{ThData()}</tr>
                     </thead>
                     <tbody>
                         {tdData()}
